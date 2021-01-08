@@ -1,0 +1,43 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: kafka-manager
+  namespace: scm
+spec:
+  selector:
+    app: kafka-manager
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30581
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-manager
+  namespace: scm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-manager
+  template:
+    metadata:
+      labels:
+        app: kafka-manager
+    spec:
+      containers:
+      - name: kafka-manager
+        #image: solsson/kafka-manager@sha256:9da595ecbb733074a1d3c6091a1e0c384da4f4e1f19f4e16276062278da8e592
+        image: qjpoo/kafka-manager
+        ports:
+        - containerPort: 80
+        env:
+        - name: ZK_HOSTS
+          value: zk-svc:2181
+        command:
+        - ./bin/kafka-manager
+        - -Dhttp.port=80
